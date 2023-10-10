@@ -1,198 +1,204 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.Arrays;
-import java.util.StringTokenizer;
-
-/**
- * <pre>
- * 백준 17144번 미세먼지 안녕!
- * https://www.acmicpc.net/problem/17144
- * 
- * 실행시간: 484ms (백준)
- * 메모리: 22,112 KB
- * 
- * "배열 돌리기"와 비슷한 문제입니다.
- * 
- * 1. 4방 탐색으로 미세먼지를 확산합니다.
- * 	방의 크기와 동일한 배열을 할당해 확산이 이루어진 직후 증가한 미세먼지의 양(다른 구역으로부터 받음)과 감소한 미세먼지의 양(퍼뜨림)을 저장해두고 모든 구역의 퍼뜨림이 끝나면 증감배열을 원본배열과 더해줍니다.
- * 
- * 2. 공기청정기를 시뮬레이션합니다.
- * 
- * </pre>
- * 
- * @author 이현호
- */
+import java.util.Scanner;
 
 public class Main {
-	//상, 하, 좌, 우 (미세먼지 확산 시뮬레이션 때 사용)
-	static int[] dx = {-1, 1, 0, 0};
-	static int[] dy = {0, 0, -1, 1};
-	static int R, C, T;							//R: 행, C: 열, T: 시간
-	static int[][] array, spreadingDust;		//array: 입력받은 원본 배열, spreadingDust: 확산하는 먼지의 양을 저장하는 배열
-	static int purifierTop = 0;					//공기청정기 위쪽 좌표 (행 값)
-	static int purifierBottom = 0;				//공기청정기 아래쪽 좌표 (행 값)
-	
-	//공기청정기 위쪽(간척 방향): 상, 우, 하, 좌 (시계 방향)
-	static int[] topPurifyDx = {-1, 0, 1, 0};
-	static int[] topPurifyDy = {0, 1, 0, -1};
-	//공기청정기 아래쪽(간척 방향): 우, 하, 좌, 상 (반시계 방향)
-	static int[] bottomPurifyDx = {0, 1, 0, -1};
-	static int[] bottomPurifyDy = {1, 0, -1, 0};
-	
-	//확산하는 먼지의 양을 저장하는 배열을 초기화하는 메소드
-	static void clearArray() {
-		for(int i=0; i<spreadingDust.length; i++) {
-			Arrays.fill(spreadingDust[i], 0);
-		}
-	}
-	
-	/**
-	 * 공기청정기의 좌표를 찾는 메소드
+	/*
+	 * 왜 16퍼에서 오답뜨는지 모르겠다 
+	 * 찾아주는사람 천재
 	 */
-	static void findPurifier() {
-		for(int i=0; i<R; i++) {
-			if(array[i][0] == -1) {
-				purifierTop = i;
-				purifierBottom = i+1;
+	static int R,C,T ;
+	static int[][] arr;
+	static int[][] copyArr;
+	static int[] dR = {1,-1,0,0};
+	static int[] dC = {0,0,-1,1};
+ 	public static void main(String[] args) {
+		Scanner sc = new Scanner(System.in);
+		
+		R = sc.nextInt();
+		C = sc.nextInt();
+		T = sc.nextInt();
+		arr = new int[R][C];
+		copyArr = new int[R][C];
+		
+		for(int r = 0 ; r < R ; r ++) {
+			for(int c = 0 ; c < C ;c++) {
+				arr[r][c] = sc.nextInt();
 				
-				return;
+			}
+		}
+		
+		for(int i = 0 ; i < T ; i++) {
+			diffuse(); //확산하다
+			
+			clean();
+		}
+		
+		
+		
+		int result = 0 ;
+		
+		for(int r = 0 ; r < R ; r ++) {
+			for(int c = 0 ; c < C ;c++) {
+				//System.out.print(arr[r][c]);
+				if(arr[r][c]>0) result += arr[r][c];
+				
+			}
+			//System.out.println();
+		}
+		
+		
+		System.out.println(result);
+	}
+ 	
+ 	
+	private static void clean() {
+		
+		for(int i = 0 ; i < R ;i++) {
+			if(copyArr[i][0] == -1) {
+				upClean(i);
+				downClean(i+1);
+				break;
+			} 
+		}
+		
+		
+		for(int r = 0 ; r < R ; r++) {
+			for(int c= 0 ; c < C ; c++) {
+				arr[r][c] = copyArr[r][c];
 			}
 		}
 	}
 	
-	/**
-	 * 미세먼지 확산 시뮬레이션 메소드 (1. 미세먼지가 확산된다. 확산은 미세먼지가 있는 모든 칸에서 동시에 일어난다.)
-	 */
-	static void spreadDust() {
-		clearArray();		//확산하는 먼지의 양을 저장하는 배열 초기화
+	
+	
+	private static void downClean(int i) {
+		int[] downWindR = {1,0,-1,0};
+		int[] downWindC = {0,1,0,-1};
 		
-		for(int i=0; i<R; i++) {
-			for(int j=0; j<C; j++) {
-				if(array[i][j] > 0) {			//해당 좌표에 먼지가 있으면
-					int count = 0;				//확산하는 구역의 개수 변수 0으로 초기화
-					
-					for(int k=0; k<4; k++) {
-						int x = i + dx[k];
-						int y = j + dy[k];
-						
-						//인접한 방향에 공기청정기가 있거나, 칸이 없으면 그 방향으로는 확산이 일어나지 않는다.
-						if(x >= 0 && x < R && y >= 0 && y < C && array[x][y] != -1) {
-							spreadingDust[x][y] += array[i][j] / 5;		//인접한 네 방향에 Ar,c/5의 먼지 증가
-							count++;									//먼지를 확산한 영역의 개수 증가
-						}
-					}
-					
-					spreadingDust[i][j] -= (array[i][j] / 5) * count;	//먼지를 확산한 양만큼 자신의 미세먼지의 양 감소
+		int dir = 0;
+		
+		
+		int curR = i+1;
+		int curC = 0;
+		
+		int nextR = curR + downWindR[dir];
+		int nextC = curC + downWindC[dir];
+
+		while(true) {
+			
+			
+			if(nextR == i && nextC == 0) {
+				copyArr[curR][curC] = 0 ;
+				break;
+			}
+			
+			
+			copyArr[curR][curC] = copyArr[nextR][nextC];
+			
+			
+			
+			if(!isRange(nextR+downWindR[dir],nextC+downWindC[dir])|| (nextR+downWindR[dir] == i-1 && nextC+downWindC[dir] == C-1 )) {
+				dir++;
+			}
+			
+			curR = nextR;
+			curC = nextC;
+			nextR += downWindR[dir];
+			nextC += downWindC[dir];
+		}
+		
+		
+	}
+	
+	private static void upClean(int i) {
+		int[] upWindR = {-1,0,1,0};
+		int[] upWindC = {0,1,0,-1};
+		
+		int dir = 0;
+		
+		
+		int curR = i-1;
+		int curC = 0;
+		
+		int nextR = curR + upWindR[dir];
+		int nextC = curC + upWindC[dir];
+
+		while(true) {
+			
+			if(nextR == i && nextC == 0) {
+				copyArr[curR][curC] = 0 ;
+				break;
+			}
+		
+			copyArr[curR][curC] = copyArr[nextR][nextC];
+			
+			
+			if(!isRange(nextR+upWindR[dir],nextC+upWindC[dir]) || (nextR+upWindR[dir] == i+1 && nextC+upWindC[dir] == C-1 )) {
+				dir++;
+			}
+			
+			curR = nextR;
+			curC = nextC;
+			nextR += upWindR[dir];
+			nextC += upWindC[dir];
+			
+			
+			
+			
+		}
+				
+	}
+	private static void diffuse() {
+		
+		for(int r = 0 ; r < R ;r++) {
+			for(int c = 0 ; c < C ; c ++) {
+				copyArr[r][c] = arr[r][c];
+			}
+		}
+		
+		
+		for(int r = 0 ; r < R ; r++) {
+			for(int c = 0 ; c < C ;c++) {
+				if(arr[r][c] > 0) {
+					play(r,c);
 				}
 			}
 		}
 		
-		//퍼진 미세먼지 반영 (받은 미세먼지 증가, 보낸 미세먼지 감소)
-		for(int i=0; i<R; i++) {
-			for(int j=0; j<C; j++) {
-				array[i][j] += spreadingDust[i][j];
-			}
-		}
 	}
 	
-	/**
-	 * 공기청정기 시뮬레이션 메소드 (2. 공기청정기가 작동한다.)
-	 * 
-	 * 배열의 범위를 벗어나거나 공기 청정기의 좌표에 도달한 경우 방향을 전환한다.
-	 */
-	static void purify() {
-		/** 공기청정기 위 시작 */
-		//왼쪽 옆 (아래 당기기)
-		for(int i=purifierTop-1; i>0; i--) {
-			array[i][0] = array[i-1][0];
-		}
-		
-		//위 (왼쪽 당기기)
-		for(int i=1; i<C; i++) {
-			array[0][i-1] = array[0][i];
-		}
-		
-		//오른쪽 옆 (위 당기기)
-		for(int i=1; i<=purifierTop; i++) {
-			array[i-1][C-1] = array[i][C-1];
-		}
-				
-		//아래 (오른쪽 당기기)
-		for(int i=C-1; i>1; i--) {				//공기청정기는 범위에서 제외
-			array[purifierTop][i] = array[purifierTop][i-1];
-		}
-		
-		array[purifierTop][1] = 0;				//공기청정기로 들어간 미세먼지는 모두 정화된다.
-		/** 공기청정기 위 끝 */
-		
-		/** 공기청정기 아래 시작 */
-		//왼쪽 옆 (위 당기기)
-		for(int i=purifierBottom+2; i<R; i++) {	//공기청정기는 범위에서 제외
-			array[i-1][0] = array[i][0];
-		}
-		
-		//아래 (왼쪽 당기기)
-		for(int i=1; i<C; i++) {
-			array[R-1][i-1] = array[R-1][i];
-		}
-		
-		//오른쪽 옆 (아래 당기기)
-		for(int i=R-1; i>purifierBottom; i--) {
-			array[i][C-1] = array[i-1][C-1];
-		}
-				
-		//위 (오른쪽 당기기)
-		for(int i=C-1; i>1; i--) {
-			array[purifierBottom][i] = array[purifierBottom][i-1];
-		}
-		
-		array[purifierBottom][1] = 0;			//공기청정기로 들어간 미세먼지는 모두 정화된다.
-		/** 공기청정기 아래 끝 */
-	}
 	
-	/**
-	 * 미세먼지의 양을 계산하는 메소드
-	 * @return: 미세먼지의 양
-	 */
-	static int countDust() {
-		int count = 0;
+	private static void play(int r , int c) {
+		// TODO Auto-generated method stub
+		int now = arr[r][c]; // 현재 먼지량
 		
-		for(int i=0; i<R; i++) {
-			count += Arrays.stream(array[i]).sum();
-		}
-		
-		return count + 2;	//공기청정기의 좌표는 -1 (총 2개 좌표 차지)로 기록되어 있으므로 2 증가시킨 값 리턴
-	}
-	
-	public static void main(String[] args) throws IOException {
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		StringTokenizer st = null;
-		
-		st = new StringTokenizer(br.readLine());
-		R = Integer.parseInt(st.nextToken());		//행의 수
-		C = Integer.parseInt(st.nextToken());		//열의 수
-		T = Integer.parseInt(st.nextToken());		//시간 (T초가 지난 후 구사과의 방에 남아있는 미세먼지의 양을 구해보자.)
-		array = new int[R][C];						//원본 방의 정보 배열
-		spreadingDust = new int[R][C];				//확산으로 증가한 미세먼지 양
-		
-		//방의 정보 입력받음 (구역 별 미세먼지의 양)
-		for(int i=0; i<R; i++) {
-			st = new StringTokenizer(br.readLine());
+		for(int i = 0 ; i < 4 ;i ++) {
+			int nextR = r + dR[i];
+			int nextC = c + dC[i];
 			
-			for(int j=0; j<C; j++) {
-				array[i][j] = Integer.parseInt(st.nextToken());
+			if(isRange(nextR,nextC) && arr[nextR][nextC] != -1) {
+				copyArr[nextR][nextC] += now/5 ;
+				copyArr[r][c] -= now/5 ; 
 			}
+			
 		}
-		
-		findPurifier();								//공기청정기의 좌표 확인
-		
-		for(int i=0; i<T; i++) {
-			spreadDust();							//미세먼지 확산 시뮬레이션
-			purify();								//공기청정기가 작동 시뮬레이션
-		}
-		
-		System.out.println(countDust());			//T초 후 방에 남아있는 미세먼지의 양 출력
 	}
-
+	
+	
+	private static boolean isRange(int r , int c) {
+		if(r >=R || r < 0 || c >=C || c < 0) return false;
+		return true;
+		
+	}
 }
+
+
+/*
+ * 
+ * 00000000
+00222320
+-10000000
+-10000000
+01331240
+03444240
+00000000
+ * */
