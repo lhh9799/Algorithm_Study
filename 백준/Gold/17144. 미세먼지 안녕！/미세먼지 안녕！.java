@@ -4,6 +4,26 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.StringTokenizer;
 
+/**
+ * <pre>
+ * 백준 17144번 미세먼지 안녕!
+ * https://www.acmicpc.net/problem/17144
+ * 
+ * 실행시간: 484ms (백준)
+ * 메모리: 22,112 KB
+ * 
+ * "배열 돌리기"와 비슷한 문제입니다.
+ * 
+ * 1. 4방 탐색으로 미세먼지를 확산합니다.
+ * 	방의 크기와 동일한 배열을 할당해 확산이 이루어진 직후 증가한 미세먼지의 양(다른 구역으로부터 받음)과 감소한 미세먼지의 양(퍼뜨림)을 저장해두고 모든 구역의 퍼뜨림이 끝나면 증감배열을 원본배열과 더해줍니다.
+ * 
+ * 2. 공기청정기를 시뮬레이션합니다.
+ * 
+ * </pre>
+ * 
+ * @author 이현호
+ */
+
 public class Main {
 	//상, 하, 좌, 우 (미세먼지 확산 시뮬레이션 때 사용)
 	static int[] dx = {-1, 1, 0, 0};
