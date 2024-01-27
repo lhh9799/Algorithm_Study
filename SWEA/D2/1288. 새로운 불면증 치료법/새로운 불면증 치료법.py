@@ -1,12 +1,29 @@
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.TreeSet;
+import java.util.HashSet;
+
+/**
+ * <pre>
+ * SWEA 1288. 새로운 불면증 치료법
+ * 
+ * 실행시간: 122ms (SWEA)
+ * 메모리: 19,380 KB
+ * 
+ * 임의의 숫자 N이 주어지고, 1 * N부터 k * N까지의 각 자리 수를 모두 추출하는데, 0에서 9까지 모든 수를 모을 때가 되는 최소 k를 구하는 문제입니다.
+ * 
+ * k * N을 Integer -> String -> Char[]로 바꾼 뒤 '0'값을 빼 Integer로 바꾸고
+ * HashSet에 넣고 그 크기가 10이 되면 리턴합니다.
+ * 
+ * </pre>
+ * 
+ * @author 이현호
+ */
 
 public class Solution {
 	
 	static int solution(int N) {
 		int multiple;
-		TreeSet<Integer> numberSlice = new TreeSet<Integer>();
+		HashSet<Integer> numberSlice = new HashSet<Integer>();
 		
 		for(int i=1; ; i++) {
 			multiple = N * i;
