@@ -4,6 +4,27 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 
+/**
+ * <pre>
+ * 백준 2667번 단지번호붙이기
+ * https://www.acmicpc.net/problem/2667
+ * 
+ * 실행시간: 96ms (백준)
+ * 메모리: 11,928 KB
+ * 
+ * 2023.10.04. 백준 2146번 다리 만들기와 비슷한 문제입니다.
+ * 
+ * 1. (지도 생성) 문제의 입력을 받습니다. 집이 있는 곳은 1로 입력받지만 그룹의 번호는 1부터 시작하므로 -1로 저장합니다.
+ * 2. 배열의 [0][0] 부터 순회하면서
+ * 2-1. -1인 값이 있으면 BFS로 그룹을 확장합니다.
+ * 2-2. 메소드가 종료될 때 그룹의 번호를 1 증가시키고 그룹 내 집의 수를 ArrayList<Integer> 타입의 houseList에 저장합니다.
+ * 3. 문제의 요구대로 그룹의 수와 정렬된 houseList를 출력합니다.
+ * 
+ * </pre>
+ * 
+ *  @author 이현호
+ */
+
 public class Main {
 	
 	//상, 하, 좌, 우
