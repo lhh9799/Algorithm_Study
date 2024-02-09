@@ -6,6 +6,10 @@
 
 메모리: 27,472 KB, 시간: 130 ms, 코드길이: 3,723 Bytes
 
+### 제출 일자
+
+2023-10-03 14:11
+
 
 
 > 출처: SW Expert Academy, https://swexpertacademy.com/main/code/problem/problemList.do
