@@ -1,9 +1,9 @@
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Map.Entry;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 public class Main {
 	
@@ -13,7 +13,7 @@ public class Main {
 		StringBuilder sb = new StringBuilder();
 		
 		int N = Integer.parseInt(br.readLine());	//좌표의 수 N
-		TreeMap<Integer, Integer> inputMap = new TreeMap<>();
+		TreeSet<Integer> inputSet = new TreeSet<>();
 		TreeMap<Integer, Integer> answerMap = new TreeMap<>();
 		ArrayList<Integer> inputKeys = new ArrayList<>();
 		st = new StringTokenizer(br.readLine());
@@ -21,15 +21,13 @@ public class Main {
 		
 		for(int i=0; i<N; i++) {
 			key = Integer.parseInt(st.nextToken());
+			inputSet.add(key);
 			inputKeys.add(key);
-			
-			inputMap.put(key, 1);
 		}
 		
 		int accumulatSum = 0;
-		for(Entry<Integer, Integer> entry : inputMap.entrySet()) {
-			answerMap.put(entry.getKey(), accumulatSum);
-			accumulatSum += entry.getValue();
+		for(int i : inputSet) {
+			answerMap.put(i, accumulatSum++);
 		}
 		
 		for(int i=0; i<N; i++) {
